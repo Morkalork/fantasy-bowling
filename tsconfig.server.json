@@ -1,0 +1,17 @@
+{
+  "include": ["server/**/*"],
+  "exclude": ["src/**/__tests__/*"],
+  "compilerOptions": {
+    "composite": true,
+    "baseUrl": "./server",
+    "types": ["node", "jsdom"],
+    "esModuleInterop": true,
+    "target": "ES2015",
+    "module": "CommonJS",
+    "moduleResolution": "Node",
+    "outDir": "./dist",
+    "rootDir": "./",
+    "lib": ["ESNext", "DOM"],
+    "noImplicitAny": false
+  }
+}
