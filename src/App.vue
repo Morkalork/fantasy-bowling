@@ -1,18 +1,35 @@
 <script setup lang="ts">
+import { storeToRefs } from 'pinia';
+import { onMounted } from 'vue';
 import { RouterLink, RouterView } from 'vue-router'
-import HelloWorld from './components/HelloWorld.vue'
+import type { MatchInfo } from './core/types/MatchInfo';
+import { useMatchInfoStore } from './stores/matches';
+
+const matchInfoStore = useMatchInfoStore();
+const { matchInfos } = storeToRefs(matchInfoStore);
+
+const fetchData = async () => {
+  await fetch('/scrape')
+  const data = await fetch('/ranking');
+  const matchInfos = (await data.json()) as MatchInfo[];
+  matchInfoStore.massUpdate(matchInfos);
+}
+
+onMounted(() => {
+  fetchData();
+})
+
 </script>
 
 <template>
   <header>
-    <img alt="Vue logo" class="logo" src="@/assets/logo.svg" width="125" height="125" />
-
     <div class="wrapper">
-      <HelloWorld msg="You did it!" />
 
       <nav>
-        <RouterLink to="/">Home</RouterLink>
-        <RouterLink to="/about">About</RouterLink>
+        <RouterLink to="/">Hem</RouterLink>
+        <RouterLink to="/team">Ditt lag</RouterLink>
+        <RouterLink to="/last-round">Senaste rundan</RouterLink>
+        <RouterLink to="/leaderboard">Topplistan</RouterLink>
       </nav>
     </div>
   </header>
@@ -24,11 +41,6 @@ import HelloWorld from './components/HelloWorld.vue'
 header {
   line-height: 1.5;
   max-height: 100vh;
-}
-
-.logo {
-  display: block;
-  margin: 0 auto 2rem;
 }
 
 nav {
@@ -49,7 +61,6 @@ nav a.router-link-exact-active:hover {
 nav a {
   display: inline-block;
   padding: 0 1rem;
-  border-left: 1px solid var(--color-border);
 }
 
 nav a:first-of-type {
@@ -61,10 +72,6 @@ nav a:first-of-type {
     display: flex;
     place-items: center;
     padding-right: calc(var(--section-gap) / 2);
-  }
-
-  .logo {
-    margin: 0 2rem 0 0;
   }
 
   header .wrapper {
@@ -80,6 +87,11 @@ nav a:first-of-type {
 
     padding: 1rem 0;
     margin-top: 1rem;
+  }
+
+  nav a {
+    display: block;
+    border-right: 1px solid var(--color-border);
   }
 }
 </style>

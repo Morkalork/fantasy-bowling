@@ -1,4 +1,8 @@
-const db = db.getSiblingDB("fba");
+/**
+ * This is run during the docker setup.
+ */
+console.log(' # # # # SETTING UP DB!');
+const db = db.getSiblingDB("fb");
 
 db.createCollection("playerInfo");
 

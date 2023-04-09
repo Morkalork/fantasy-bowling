@@ -3,10 +3,12 @@ import { MatchInfoModel } from "../db/models/match-info-model";
 import { PlayerInfoModel } from "../db/models/player-info-model";
 import { evaluateMatchIds } from "./evaluate-match-ids";
 import { evaluatePlayerInfos } from "./evaluate-player-infos";
-import type { PlayerInfo, MatchInfo } from "./types";
+import { PlayerInfo, MatchInfo, DIVISION } from "./types";
 
-const URL =
-  "https://bits.swebowl.se/seriespel?seasonId=2022&divisionId=4&showAllDivisionMatches=true";
+const SEASON = 2022;
+
+const getUrl = (season: number, division: DIVISION) =>
+  `https://bits.swebowl.se/seriespel?seasonId=${season}&divisionId=${division}&showAllDivisionMatches=true`;
 
 const getGameInfoUrl = (gameInfoId: number) =>
   `https://bits.swebowl.se/match-detail?matchid=${gameInfoId}`;
@@ -54,7 +56,19 @@ export const scraper = async () => {
     console.log(message.text());
   });
 
-  await page.goto(URL);
+  await scrapeDivision(page, DIVISION.Elitserien);
+  await scrapeDivision(page, DIVISION.NordAllsvenskan);
+  await scrapeDivision(page, DIVISION.MellanAllsvenskan);
+  await scrapeDivision(page, DIVISION.SydAllsvenskan);
+
+  console.log("Scraper done...");
+
+  browser.close();
+};
+
+async function scrapeDivision(page: puppeteer.Page, division: DIVISION) {
+  const url = getUrl(SEASON, division);
+  await page.goto(url);
   await page.waitForSelector(".k-grid-content table tbody tr");
 
   const existingIds: number[] = (
@@ -86,21 +100,14 @@ export const scraper = async () => {
     );
   }
 
-  console.log("Saving players...");
   const playerInfoModels = playerInfos.map((playerInfo) => {
     return new PlayerInfoModel(playerInfo);
   });
   await Promise.all(playerInfoModels.map((m) => m.save()));
-  console.log("Done saving players!");
 
-  console.log("Saving match info data...");
   const matchInfoModels = matchInfos.map((matchInfo) => {
     return new MatchInfoModel(matchInfo);
   });
   await Promise.all(matchInfoModels.map((m) => m.save()));
-  console.log("Done saving match info data!");
+}
 
-  console.log("Scraper done...");
-
-  browser.close();
-};

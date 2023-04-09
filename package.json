@@ -12,6 +12,7 @@
     "lint": "eslint . --ext .vue,.js,.jsx,.cjs,.mjs,.ts,.tsx,.cts,.mts --fix --ignore-path .gitignore",
     "format": "prettier --write src/",
     "build-server": "tsc -p tsconfig.server.json",
+    "dev-server": "IS_DEV=true IS_LOCAL=true node dist/server/index.js",
     "build-all": "npm run build && npm run build-server"
   },
   "dependencies": {
