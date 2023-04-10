@@ -1,6 +1,7 @@
-import type { MatchInfo, PlayerInfo } from './types'
+import type { DIVISION, MatchInfo, PlayerInfo } from './types'
 
-export const evaluatePlayerInfos = () => {
+export const evaluatePlayerInfos = (division: DIVISION, season: number) => {
+  console.log('EVALUATE PLAYER INFO FOR DIVISION "' + division + '"');
   const rows = document.querySelectorAll('.matchdetail-player-scores table tr:not(.Grid_Header)')
 
   // Get match info
@@ -39,7 +40,7 @@ export const evaluatePlayerInfos = () => {
         numberOfSeries: parseInt(row.querySelector('td:nth-child(7)')?.textContent || '0'),
         points: parseInt(row.querySelector('td:nth-child(8)')?.textContent || '0'),
         gameRank: parseInt(row.querySelector('td:nth-child(9)')?.textContent || '0'),
-        matchId
+        isHome: row.querySelector('td.HomeTeamCell') !== null
       })
     }
   })
@@ -50,8 +51,13 @@ export const evaluatePlayerInfos = () => {
     home: document.querySelector('.home-team .team-name')?.textContent || '',
     homeScore: parseInt(matchInfoScore[0]),
     away: document.querySelector('.away-team .team-name')?.textContent || '',
-    awayScore: parseInt(matchInfoScore[1])
+    awayScore: parseInt(matchInfoScore[1]),
+    division,
+    season,
+    players: playerInfos
   }
 
-  return Promise.resolve({ playerInfos, matchInfo })
+  console.log('Evaluated match ', matchId, matchInfo.date);
+
+  return Promise.resolve({ matchInfo })
 }

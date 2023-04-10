@@ -6,10 +6,11 @@ export type PlayerInfo = {
   numberOfSeries: number
   points: number
   gameRank: number
-  matchId: number
+  isHome: boolean
 }
 
 export type MatchInfo = {
+  division: DIVISION
   matchId: number
   round: number
   date: string
@@ -17,6 +18,8 @@ export type MatchInfo = {
   homeScore: number
   away: string
   awayScore: number
+  season: number
+  players: PlayerInfo[]
 }
 
 export type MatchRound = {}

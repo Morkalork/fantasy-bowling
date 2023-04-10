@@ -6,4 +6,6 @@ export type MatchInfo = {
     date: string;
     matchId: string;
     round: number;
+    season: number;
+    division: number;
 }

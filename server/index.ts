@@ -1,12 +1,14 @@
 import path from 'path'
-import express from 'express'
+import express, { Response } from 'express'
 import { scraper } from './scraper/index'
 import winston from 'winston'
 import expressWinston from 'express-winston'
-import { connect } from 'mongoose'
+import { Callback, connect } from 'mongoose'
 import dotenv from 'dotenv'
 import { router } from './routes'
 import { MatchInfoModel } from './db/models/match-info-model'
+import { PlayerInfoModel } from './db/models/player-info-model'
+import { PlayerInfo } from './scraper/types'
 
 dotenv.config()
 const isDev = !!process.env.IS_DEV
@@ -62,7 +64,7 @@ app.get('/scrape', (req, res) => {
   console.log('Starting craping...')
   res.send('Scraping...')
   scraper().then(() => {
-    console.log('SCRAPING COMPLETE!')
+    console.log('SCRAPING COMPLETE 2!')
   })
 })
 
@@ -73,8 +75,39 @@ app.get('/ranking', (req, res) => {
   })
 })
 
+app.get('/player/search/:name', (req, res) => {
+  const name = req.params.name
+  const searchRegex = new RegExp(`.*${name}.*`, 'gi')
+  runQueryWithErrorHandling(async () => {
+    const result: PlayerInfo[] = await MatchInfoModel.aggregate()
+      .unwind('$players')
+      .match({ 'players.name': searchRegex })
+      .group({_id: { licenseNumber: '$players.licenseNumber', name: '$players.name' }})
+      .project({ licenseNumber: '$_id.licenseNumber', name: '$_id.name' })
+    res.json(result)
+  }, 'get player')
+})
+
+app.get('/player/:licenseNumber', (req, res) => {
+  const licenseNumber = req.params.licenseNumber
+  runQueryWithErrorHandling(async () => {
+    const result: PlayerInfo[] = await MatchInfoModel.aggregate()
+      .unwind('$players')
+      .match({ 'players.licenseNumber': licenseNumber })
+    res.json(result)
+  }, 'get player')
+})
+
 app.get('/players', (req, res) => {
-  console.log('GET PLAYER!')
+  runQueryWithErrorHandling(async () => {
+    const result: PlayerInfo[] = await MatchInfoModel.aggregate([
+      { $unwind: '$players' },
+      { $group: { _id: { licenseNumber: '$players.licenseNumber', name: '$players.name' } } },
+      { $project: { licenseNumber: '$_id.licenseNumber', name: '$_id.name' } }
+    ])
+    const players = result.map(({ licenseNumber, name }) => ({ licenseNumber, name }))
+    res.json(players)
+  }, 'get players')
 })
 
 app.listen(PORT, '0.0.0.0', async () => {
@@ -83,4 +116,12 @@ app.listen(PORT, '0.0.0.0', async () => {
   console.log('App is now running at http://localhost:%d', PORT)
 })
 
-// scraper();
+const runQueryWithErrorHandling = async (func: () => Promise<void>, actionDescription: string) => {
+  try {
+    await func()
+  } catch (error) {
+    console.error(`Failed to '${actionDescription}`)
+    console.error(error)
+    throw error
+  }
+}

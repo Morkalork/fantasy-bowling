@@ -1,5 +1,5 @@
-import { Schema } from "mongoose";
-import type { PlayerInfo } from "../../scraper/types";
+import { Schema } from 'mongoose'
+import type { PlayerInfo } from '../../scraper/types'
 
 export const PlayerInfoSchema = new Schema<PlayerInfo>({
   name: { type: String, required: true },
@@ -9,4 +9,5 @@ export const PlayerInfoSchema = new Schema<PlayerInfo>({
   numberOfSeries: { type: Number, required: true },
   points: { type: Number, required: true },
   gameRank: { type: Number, required: true },
-});
+  isHome: { type: Boolean, required: true }
+})

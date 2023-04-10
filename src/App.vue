@@ -10,7 +10,7 @@ const { matchInfos } = storeToRefs(matchInfoStore);
 
 const fetchData = async () => {
   await fetch('/scrape')
-  const data = await fetch('/ranking');
+  const data = await fetch('/players/2022');
   const matchInfos = (await data.json()) as MatchInfo[];
   matchInfoStore.massUpdate(matchInfos);
 }
